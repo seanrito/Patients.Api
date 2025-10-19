@@ -58,44 +58,80 @@ var app = builder.Build();
 // 🔥 Crear base de datos y aplicar migraciones ANTES de iniciar la app
 using (var scope = app.Services.CreateScope())
 {
-    try
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    
+    // Reintentar hasta 10 veces con delay incremental
+    int maxRetries = 10;
+    int retryCount = 0;
+    
+    while (retryCount < maxRetries)
     {
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        
-        logger.LogInformation("🔍 Verificando base de datos...");
-        
-        // Aumentar el timeout del comando para migraciones
-        db.Database.SetCommandTimeout(180); // 3 minutos
-        
-        // Verificar si hay migraciones pendientes
-        var pendingMigrations = await db.Database.GetPendingMigrationsAsync();
-        logger.LogInformation($"📋 Migraciones pendientes: {pendingMigrations.Count()}");
-        
-        if (pendingMigrations.Any())
+        try
         {
-            foreach (var migration in pendingMigrations)
+            logger.LogInformation("🔍 Intento {Retry}/{MaxRetries} - Verificando conexión a base de datos...", retryCount + 1, maxRetries);
+            
+            // Aumentar el timeout del comando para migraciones
+            db.Database.SetCommandTimeout(180); // 3 minutos
+            
+            // IMPORTANTE: Cambiar la cadena de conexión temporalmente a 'master' para crear la BD
+            var connectionString = db.Database.GetConnectionString();
+            if (connectionString != null && !connectionString.Contains("Database=master"))
             {
-                logger.LogInformation($"  - {migration}");
+                // Intentar conectar primero
+                try
+                {
+                    var canConnect = await db.Database.CanConnectAsync();
+                    logger.LogInformation("✅ Base de datos accesible");
+                }
+                catch (Exception)
+                {
+                    // Si falla, probablemente la BD no existe, así que la creamos
+                    logger.LogInformation("⚙️ Base de datos no existe, creándola...");
+                    await db.Database.EnsureCreatedAsync();
+                    logger.LogInformation("✅ Base de datos creada");
+                }
             }
             
-            logger.LogInformation("⚙️ Aplicando migraciones...");
-            await db.Database.MigrateAsync();
-            logger.LogInformation("✅ Migraciones aplicadas exitosamente.");
+            // Verificar si hay migraciones pendientes
+            var pendingMigrations = await db.Database.GetPendingMigrationsAsync();
+            logger.LogInformation($"📋 Migraciones pendientes: {pendingMigrations.Count()}");
+            
+            if (pendingMigrations.Any())
+            {
+                foreach (var migration in pendingMigrations)
+                {
+                    logger.LogInformation($"  - {migration}");
+                }
+                
+                logger.LogInformation("⚙️ Aplicando migraciones...");
+                await db.Database.MigrateAsync();
+                logger.LogInformation("✅ Migraciones aplicadas exitosamente.");
+            }
+            else
+            {
+                logger.LogInformation("✅ Base de datos ya está actualizada.");
+            }
+            
+            // Éxito, salir del bucle
+            break;
         }
-        else
+        catch (Exception ex)
         {
-            logger.LogInformation("✅ Base de datos ya está actualizada.");
+            retryCount++;
+            
+            if (retryCount >= maxRetries)
+            {
+                logger.LogError(ex, "❌ Error al inicializar la base de datos después de {MaxRetries} intentos", maxRetries);
+                logger.LogWarning("⚠️ La aplicación continuará sin aplicar migraciones.");
+                logger.LogWarning("⚠️ Aplícalas manualmente con: dotnet ef database update");
+                break;
+            }
+            
+            var waitSeconds = retryCount * 5; // 5s, 10s, 15s, etc.
+            logger.LogWarning(ex, "⚠️ Intento {Retry} falló. Esperando {WaitSeconds}s antes de reintentar...", retryCount, waitSeconds);
+            await Task.Delay(TimeSpan.FromSeconds(waitSeconds));
         }
-    }
-    catch (Exception ex)
-    {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "❌ Error al inicializar la base de datos");
-        
-        // No lanzar la excepción para permitir que la app continúe
-        // throw; 
-        logger.LogWarning("⚠️ La aplicación continuará sin aplicar migraciones. Aplícalas manualmente con: dotnet ef database update");
     }
 }
 

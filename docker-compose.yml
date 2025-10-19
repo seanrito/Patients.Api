@@ -1,0 +1,41 @@
+services:
+  # SQL Server
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: patients-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Password123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - patients-network
+
+  # API
+  patients-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: patients-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PatientsDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+    ports:
+      - "5000:8080"
+    depends_on:
+      - sqlserver
+    networks:
+      - patients-network
+    restart: on-failure
+
+volumes:
+  sqlserver-data:
+    driver: local
+
+networks:
+  patients-network:
+    driver: bridge
