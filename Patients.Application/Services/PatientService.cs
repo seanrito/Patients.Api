@@ -3,7 +3,6 @@ using FluentValidation;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Patients.Application.Dtos;
-using Patients.Application.DTOs;
 using Patients.Application.Exceptions;
 using Patients.Application.Interfaces;
 using Patients.Domain.Entities;

@@ -1,9 +1,8 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Patients.Api.Controllers;
 using Patients.Application.Dtos;
-using Patients.Application.DTOs;
 using Patients.Application.Interfaces;
 
 namespace Patients.Tests;
@@ -30,7 +29,7 @@ public class PatientsControllerTests
             DocumentType = "CC",
             DocumentNumber = "123456789",
             FirstName = "Juan",
-            LastName = "Pérez",
+            LastName = "Perez",
             BirthDate = new DateTime(1990, 1, 1),
             Email = "juan.perez@example.com",
             PhoneNumber = "3001234567"
@@ -42,7 +41,7 @@ public class PatientsControllerTests
             DocumentType = "CC",
             DocumentNumber = "123456789",
             FirstName = "Juan",
-            LastName = "Pérez",
+            LastName = "Perez",
             BirthDate = new DateTime(1990, 1, 1),
             Email = "juan.perez@example.com",
             PhoneNumber = "3001234567",
@@ -72,8 +71,8 @@ public class PatientsControllerTests
         {
             DocumentType = "TI",
             DocumentNumber = "987654321",
-            FirstName = "María",
-            LastName = "González",
+            FirstName = "Maria",
+            LastName = "Gonzalez",
             BirthDate = new DateTime(2005, 5, 15),
             Email = "maria.gonzalez@example.com"
         };
@@ -83,8 +82,8 @@ public class PatientsControllerTests
             PatientId = 2,
             DocumentType = "TI",
             DocumentNumber = "987654321",
-            FirstName = "María",
-            LastName = "González",
+            FirstName = "Maria",
+            LastName = "Gonzalez",
             BirthDate = new DateTime(2005, 5, 15),
             Email = "maria.gonzalez@example.com",
             CreatedAt = DateTime.UtcNow
@@ -118,7 +117,7 @@ public class PatientsControllerTests
             DocumentType = "CE",
             DocumentNumber = "CE123456",
             FirstName = "Carlos",
-            LastName = "Rodríguez",
+            LastName = "Rodriguez",
             BirthDate = new DateTime(1985, 8, 20),
             PhoneNumber = "3109876543"
         };
@@ -130,7 +129,7 @@ public class PatientsControllerTests
             DocumentType = "CE",
             DocumentNumber = "CE123456",
             FirstName = "Carlos",
-            LastName = "Rodríguez",
+            LastName = "Rodriguez",
             BirthDate = new DateTime(1985, 8, 20),
             PhoneNumber = "3109876543",
             CreatedAt = DateTime.UtcNow
@@ -162,7 +161,7 @@ public class PatientsControllerTests
             DocumentType = "CC",
             DocumentNumber = "111222333",
             FirstName = "Pedro",
-            LastName = "Martínez",
+            LastName = "Martinez",
             BirthDate = new DateTime(1995, 3, 10)
         };
 
@@ -172,7 +171,7 @@ public class PatientsControllerTests
             DocumentType = "CC",
             DocumentNumber = "111222333",
             FirstName = "Pedro",
-            LastName = "Martínez",
+            LastName = "Martinez",
             BirthDate = new DateTime(1995, 3, 10),
             CreatedAt = DateTime.UtcNow
         };
@@ -217,7 +216,7 @@ public class PatientsControllerTests
                     DocumentType = "CC",
                     DocumentNumber = "123456789",
                     FirstName = "Juan",
-                    LastName = "Pérez",
+                    LastName = "Perez",
                     BirthDate = new DateTime(1990, 1, 1),
                     CreatedAt = DateTime.UtcNow.AddDays(-5)
                 },
@@ -226,8 +225,8 @@ public class PatientsControllerTests
                     PatientId = 2,
                     DocumentType = "TI",
                     DocumentNumber = "987654321",
-                    FirstName = "María",
-                    LastName = "González",
+                    FirstName = "Maria",
+                    LastName = "Gonzalez",
                     BirthDate = new DateTime(2005, 5, 15),
                     CreatedAt = DateTime.UtcNow.AddDays(-3)
                 }
@@ -271,7 +270,7 @@ public class PatientsControllerTests
                     DocumentType = "CC",
                     DocumentNumber = "123456789",
                     FirstName = "Juan",
-                    LastName = "Pérez",
+                    LastName = "Perez",
                     BirthDate = new DateTime(1990, 1, 1),
                     CreatedAt = DateTime.UtcNow
                 }
@@ -367,8 +366,8 @@ public class PatientsControllerTests
                     PatientId = 2,
                     DocumentType = "TI",
                     DocumentNumber = "987654321",
-                    FirstName = "María",
-                    LastName = "González",
+                    FirstName = "Maria",
+                    LastName = "Gonzalez",
                     BirthDate = new DateTime(2005, 5, 15),
                     CreatedAt = DateTime.UtcNow.AddDays(-1)
                 },
@@ -378,7 +377,7 @@ public class PatientsControllerTests
                     DocumentType = "CC",
                     DocumentNumber = "123456789",
                     FirstName = "Juan",
-                    LastName = "Pérez",
+                    LastName = "Perez",
                     BirthDate = new DateTime(1990, 1, 1),
                     CreatedAt = DateTime.UtcNow.AddDays(-5)
                 }
@@ -414,7 +413,7 @@ public class PatientsControllerTests
         
         var query = new PatientQueryParamsDto
         {
-            Name = "Sebastián",
+            Name = "Sebastian",
             DocumentNumber = "123456789",
             CreatedFrom = createdFrom,
             CreatedTo = createdTo,
@@ -442,7 +441,7 @@ public class PatientsControllerTests
         // Assert
         _mockPatientService.Verify(
             s => s.GetAllAsync(It.Is<PatientQueryParamsDto>(q =>
-                q.Name == "Sebastián" &&
+                q.Name == "Sebastian" &&
                 q.DocumentNumber == "123456789" &&
                 q.CreatedFrom == createdFrom &&
                 q.CreatedTo == createdTo &&

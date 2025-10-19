@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Patients.Application.Dtos;
-using Patients.Application.DTOs;
 using Patients.Application.Interfaces;
 
 namespace Patients.Api.Controllers

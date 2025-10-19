@@ -1,5 +1,4 @@
-﻿using Patients.Application.Dtos;
-using Patients.Application.DTOs;
+using Patients.Application.Dtos;
 
 namespace Patients.Application.Interfaces
 {

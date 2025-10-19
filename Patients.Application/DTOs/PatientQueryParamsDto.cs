@@ -1,4 +1,4 @@
-﻿namespace Patients.Application.DTOs
+﻿namespace Patients.Application.Dtos
 {
     public class PatientQueryParamsDto
     {

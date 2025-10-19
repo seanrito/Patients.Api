@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Patients.Api.Controllers;
 using Patients.Application.Dtos;
-using Patients.Application.DTOs;
 using Patients.Application.Exceptions;
 using Patients.Application.Interfaces;
 
@@ -23,7 +22,7 @@ public class PatientsControllerAdvancedTests
         _controller = new PatientsController(_mockPatientService.Object);
     }
 
-    #region Create - Casos de Excepción
+    #region Create - Casos de ExcepciÃ³n
 
     [Fact]
     public async Task Create_WhenDuplicatePatientExists_ThrowsDuplicatePatientException()
@@ -34,20 +33,20 @@ public class PatientsControllerAdvancedTests
             DocumentType = "CC",
             DocumentNumber = "123456789",
             FirstName = "Juan",
-            LastName = "Pérez",
+            LastName = "Perez",
             BirthDate = new DateTime(1990, 1, 1)
         };
 
         _mockPatientService
             .Setup(s => s.CreateAsync(It.IsAny<CreatePatientDto>()))
-            .ThrowsAsync(new DuplicatePatientException("Ya existe un paciente con el mismo tipo y número de documento."));
+            .ThrowsAsync(new DuplicatePatientException("Ya existe un paciente con el mismo tipo y numero de documento."));
 
         // Act
         Func<Task> act = async () => await _controller.Create(createDto);
 
         // Assert
         await act.Should().ThrowAsync<DuplicatePatientException>()
-            .WithMessage("Ya existe un paciente con el mismo tipo y número de documento.");
+            .WithMessage("Ya existe un paciente con el mismo tipo y numero de documento.");
     }
 
     [Fact]
@@ -59,12 +58,12 @@ public class PatientsControllerAdvancedTests
             DocumentType = "CC",
             DocumentNumber = "", // Invalid: empty document number
             FirstName = "Juan",
-            LastName = "Pérez",
+            LastName = "Perez",
             BirthDate = new DateTime(1990, 1, 1)
         };
 
         var validationResult = new FluentValidation.Results.ValidationResult(
-            new[] { new FluentValidation.Results.ValidationFailure("DocumentNumber", "El número de documento es requerido") }
+            new[] { new FluentValidation.Results.ValidationFailure("DocumentNumber", "El numero de documento es requerido") }
         );
 
         _mockPatientService
@@ -87,7 +86,7 @@ public class PatientsControllerAdvancedTests
             DocumentType = "CC",
             DocumentNumber = "123456789",
             FirstName = "Juan",
-            LastName = "Pérez",
+            LastName = "Perez",
             BirthDate = DateTime.UtcNow.AddDays(1) // Fecha futura
         };
 
@@ -264,7 +263,7 @@ public class PatientsControllerAdvancedTests
                     DocumentType = "CC",
                     DocumentNumber = "123456789",
                     FirstName = "Juan",
-                    LastName = "Pérez",
+                    LastName = "Perez",
                     BirthDate = new DateTime(1990, 1, 1),
                     CreatedAt = new DateTime(2025, 6, 15)
                 }
@@ -354,8 +353,8 @@ public class PatientsControllerAdvancedTests
                     PatientId = 1,
                     DocumentType = "CC",
                     DocumentNumber = "123456789",
-                    FirstName = "Sebastián",
-                    LastName = "Rodríguez",
+                    FirstName = "Sebastian",
+                    LastName = "Rodriguez",
                     BirthDate = new DateTime(1990, 1, 1),
                     CreatedAt = DateTime.UtcNow
                 }
@@ -377,7 +376,7 @@ public class PatientsControllerAdvancedTests
         var pagedResult = okResult!.Value as PagedResultDto<PatientDto>;
         pagedResult.Should().NotBeNull();
         pagedResult!.Items.Should().NotBeEmpty();
-        pagedResult.Items.First().FirstName.Should().Contain("Sebastián");
+        pagedResult.Items.First().FirstName.Should().Contain("Sebastian");
     }
 
     [Fact]
@@ -389,8 +388,8 @@ public class PatientsControllerAdvancedTests
         {
             DocumentType = "CC",
             DocumentNumber = "123456789",
-            FirstName = "Sebastián",
-            LastName = "Rodríguez",
+            FirstName = "Sebastian",
+            LastName = "Rodriguez",
             BirthDate = new DateTime(1990, 1, 1),
             Email = validEmail
         };
@@ -400,8 +399,8 @@ public class PatientsControllerAdvancedTests
             PatientId = 1,
             DocumentType = "CC",
             DocumentNumber = "123456789",
-            FirstName = "Sebastián",
-            LastName = "Rodríguez",
+            FirstName = "Sebastian",
+            LastName = "Rodriguez",
             BirthDate = new DateTime(1990, 1, 1),
             Email = validEmail,
             CreatedAt = DateTime.UtcNow
@@ -442,7 +441,7 @@ public class PatientsControllerAdvancedTests
                     DocumentType = "CC",
                     DocumentNumber = exactDocumentNumber,
                     FirstName = "Juan",
-                    LastName = "Pérez",
+                    LastName = "Perez",
                     BirthDate = new DateTime(1990, 1, 1),
                     CreatedAt = DateTime.UtcNow
                 }

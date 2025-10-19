@@ -1,0 +1,41 @@
+# EditorConfig para mantener consistencia en la codificación
+# Sitio web: https://editorconfig.org
+
+root = true
+
+# Configuración por defecto para todos los archivos
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Archivos de código C#
+[*.cs]
+indent_style = space
+indent_size = 4
+charset = utf-8
+
+# Archivos de proyecto
+[*.{csproj,props,targets}]
+indent_size = 2
+charset = utf-8
+
+# JSON, YAML, XML
+[*.{json,yml,yaml,xml}]
+indent_size = 2
+charset = utf-8
+
+# Markdown
+[*.md]
+trim_trailing_whitespace = false
+charset = utf-8
+
+# Scripts de PowerShell
+[*.ps1]
+charset = utf-8
+
+# Docker
+[{Dockerfile,docker-compose.yml}]
+indent_size = 2
+charset = utf-8
