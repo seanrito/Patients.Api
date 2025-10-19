@@ -1,0 +1,119 @@
+﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using Patients.Api.Middlewares;
+using Patients.Application.Interfaces;
+using Patients.Application.Mappings;
+using Patients.Application.Services;
+using Patients.Application.Validators;
+using Patients.Infrastructure.Persistence;
+
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Patients API",
+        Version = "v1",
+        Description = "API para la gestión de pacientes (Prueba Técnica Backend)",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "Sebastián Rodríguez",
+            Email = "seanrito@gmail.com"
+        }
+    });
+});
+builder.Services.AddValidatorsFromAssemblyContaining<CreatePatientValidator>();
+
+// Database configuration
+builder.Services.AddDbContext<ApplicationDbContext>(options => {
+    options
+        .UseSqlServer(
+            builder.Configuration.GetConnectionString("DefaultConnection"),
+            sqlOptions => {
+                sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 3,
+                    maxRetryDelay: TimeSpan.FromSeconds(5),
+                    errorNumbersToAdd: null);
+                sqlOptions.CommandTimeout(180); // 3 minutos para operaciones pesadas
+            })
+        .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+        .EnableDetailedErrors(builder.Environment.IsDevelopment());
+        // EnableSensitiveDataLogging removido para evitar warnings
+});
+
+// Dependency Injection
+builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
+
+// Mappers
+builder.Services.AddAutoMapper(typeof(PatientProfile));
+
+
+var app = builder.Build();
+
+// 🔥 Crear base de datos y aplicar migraciones ANTES de iniciar la app
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        
+        logger.LogInformation("🔍 Verificando base de datos...");
+        
+        // Aumentar el timeout del comando para migraciones
+        db.Database.SetCommandTimeout(180); // 3 minutos
+        
+        // Verificar si hay migraciones pendientes
+        var pendingMigrations = await db.Database.GetPendingMigrationsAsync();
+        logger.LogInformation($"📋 Migraciones pendientes: {pendingMigrations.Count()}");
+        
+        if (pendingMigrations.Any())
+        {
+            foreach (var migration in pendingMigrations)
+            {
+                logger.LogInformation($"  - {migration}");
+            }
+            
+            logger.LogInformation("⚙️ Aplicando migraciones...");
+            await db.Database.MigrateAsync();
+            logger.LogInformation("✅ Migraciones aplicadas exitosamente.");
+        }
+        else
+        {
+            logger.LogInformation("✅ Base de datos ya está actualizada.");
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "❌ Error al inicializar la base de datos");
+        
+        // No lanzar la excepción para permitir que la app continúe
+        // throw; 
+        logger.LogWarning("⚠️ La aplicación continuará sin aplicar migraciones. Aplícalas manualmente con: dotnet ef database update");
+    }
+}
+
+// Configure middleware
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Patients API v1");
+});
+
+
+app.UseHttpsRedirection();
+
+// 🔥 Middleware global de manejo de errores
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
+
